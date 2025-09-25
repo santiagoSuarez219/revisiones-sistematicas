@@ -214,4 +214,32 @@ export class PaperController {
       });
     }
   };
+
+  // ...código existente...
+
+  static getPapersByLabels = async (req: Request, res: Response) => {
+    try {
+      // labels puede venir como string (un solo label) o array (varios labels)
+      let { labels } = req.query;
+
+      if (!labels) {
+        return res
+          .status(400)
+          .json({ error: "Debes especificar al menos un label" });
+      }
+
+      // Si es string, convertir a array
+      if (typeof labels === "string") {
+        labels = [labels];
+      }
+
+      // Buscar papers que contengan TODOS los labels indicados
+      const papers = await Paper.find({ labels: { $all: labels } });
+
+      res.json({ papers, filter: labels, total: papers.length });
+    } catch (error) {
+      console.error("Error in getPapersByLabels:", error);
+      res.status(500).json({ error: "Error al filtrar por labels" });
+    }
+  };
 }
